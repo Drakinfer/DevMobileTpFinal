@@ -5,7 +5,10 @@ const cors = require('cors');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST'],
+}));
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb://localhost:27017/tp-react-native', {
@@ -22,9 +25,20 @@ const User = mongoose.model('User', userSchema);
 
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Tous les champs sont requis' });
+    }
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+        return res.status(400).json({ message: 'L\'utilisateur existe déjà' });
+    }
+
+
     const newUser = new User({ username, password });
     await newUser.save();
-    res.json({ message: 'User registered successfully!' });
+    res.json({ message: 'Vous êtes bien enregistré' });
 });
 
 app.post('/login', async (req, res) => {
