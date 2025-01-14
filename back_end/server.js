@@ -43,11 +43,22 @@ app.post('/register', async (req, res) => {
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-    const user = await User.findOne({ username, password });
-    if (user) {
-        res.json({ message: 'Login successful!' });
-    } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Tous les champs sont requis' });
+    }
+
+    try {
+        const user = await User.findOne({ username, password });
+
+        if (!user) {
+            return res.status(401).json({ message: 'Nom d\'utilisateur ou mot de passe incorrect' });
+        }
+
+        res.status(200).json({ message: 'Connexion réussie !', userId: user._id });
+    } catch (error) {
+        console.error('Erreur de connexion :', error);
+        res.status(500).json({ message: 'Erreur interne du serveur' });
     }
 });
 
