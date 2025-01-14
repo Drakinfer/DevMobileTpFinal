@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
+import { useSession } from '../context/sessionContext';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation } :any) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const { session, setSession } = useSession();
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -18,8 +20,13 @@ const LoginScreen = () => {
                 username,
                 password,
             });
-
-            setMessage(response.data.message); // Affiche le message de succès
+    
+            const { session } = response.data;
+    
+            setSession(session);
+    
+            setMessage('Connexion réussie');
+            navigation.navigate('Home');
         } catch (error: any) {
             if (error.response && error.response.data.message) {
                 setMessage(error.response.data.message);
